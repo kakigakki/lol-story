@@ -1,12 +1,14 @@
 <template>
   <div id="app">
+    <Header></Header>
     <router-view />
     <Tabbar></Tabbar>
   </div>
 </template>
 
 <script>
-import Tabbar from "components/TabBar";
+import Tabbar from "components/TabBar/TabBar";
+import Header from "components/Header/Header";
 export default {
   data() {
     return {
@@ -15,14 +17,12 @@ export default {
   },
   components: {
     Tabbar,
+    Header,
   },
 };
 </script>
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
 }
