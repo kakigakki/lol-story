@@ -14,7 +14,23 @@
           斩断
         </van-col>
       </van-row>
-      <div>story</div>
+      <van-tabs
+        v-model="active"
+        animated
+        swipeable
+        sticky
+        class="tabs"
+        v-if="Object.keys(chineseVer).length"
+      >
+        <van-tab title="标签 1">
+          <van-list>
+            <Content :content="chineseVer" />
+          </van-list>
+        </van-tab>
+        <van-tab title="标签 2">内容 2</van-tab>
+        <van-tab title="标签 3">内容 3</van-tab>
+        <van-tab title="标签 4">内容 4</van-tab>
+      </van-tabs>
     </div>
   </transition>
 </template>
@@ -22,9 +38,17 @@
 <script>
 import { mapGetters } from "vuex";
 import { storyContent } from "api/story";
-import { Icon, Row, Col } from "vant";
+import { Icon, Row, Col, Tab, Tabs, List } from "vant";
+import { StoryCon } from "common/js/story.js";
+import Content from "./child/Content";
 
 export default {
+  data() {
+    return {
+      active: 0,
+      chineseVer: {},
+    };
+  },
   computed: {
     ...mapGetters({
       storyUrl: "getStoryUrl",
@@ -34,6 +58,10 @@ export default {
     [Icon.name]: Icon,
     [Row.name]: Row,
     [Col.name]: Col,
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs,
+    [List.name]: List,
+    Content,
   },
   created() {
     this._showStoryDetail(this.storyUrl);
@@ -42,6 +70,11 @@ export default {
     _showStoryDetail(uri) {
       storyContent(uri).then((res) => {
         console.log(res);
+        this.chineseVer = new StoryCon(
+          res.story.title,
+          res.story.subtitle,
+          res.story["story-sections"]
+        );
       });
     },
     backToList() {
@@ -55,20 +88,6 @@ export default {
 @import '~common/stylus/variable';
 @import '~common/stylus/mixin';
 
-.head {
-  position: fixed;
-  top: 0;
-  height: 44px;
-  width: 100%;
-  background-color: $color-card;
-
-  .title {
-    font-size: 20px;
-    line-height: 44px;
-    no-wrap();
-  }
-}
-
 .story {
   position: fixed;
   z-index: 150;
@@ -76,7 +95,25 @@ export default {
   left: 0;
   bottom: 0;
   right: 0;
-  background: #000;
+  background: $color-background;
+
+  .tabs {
+    top: 44px;
+  }
+
+  .head {
+    position: fixed;
+    top: 0;
+    height: 44px;
+    width: 100%;
+    background-color: $color-card;
+
+    .title {
+      font-size: 20px;
+      line-height: 44px;
+      no-wrap();
+    }
+  }
 }
 
 .slide-enter-active, .slide-leave-active {

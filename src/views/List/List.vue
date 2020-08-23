@@ -91,9 +91,11 @@ export default {
       });
       this.setStoryUrl(url);
     },
+    //获取故事url
     ...mapMutations({
       setStoryUrl: "SET_STORYURL",
     }),
+    //上拉刷新事件
     pullupLoading() {
       //显示加载图片
       if (this.stories.length) {
@@ -104,10 +106,9 @@ export default {
           }
           this.shownStories.push(this.stories.shift());
         }
-        setTimeout(() => {
-          this.$refs.scroll.finishPullUp();
-        }, 1000);
+        this.$refs.scroll.finishPullUp();
       } else {
+        //没有更多的结果时,设置为加载图片隐藏
         this.isLoading = false;
         this.isFinished = true;
       }
