@@ -147,6 +147,9 @@ export default {
       // 代理better-scroll的scrollToElement方法
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments);
     },
+    finishPullUp() {
+      this.scroll && this.scroll.finishPullUp.apply(this.scroll, arguments);
+    },
   },
   watch: {
     // 监听数据的变化，延时refreshDelay时间后调用refresh方法重新计算，保证滚动效果正常

@@ -1,52 +1,70 @@
 <template>
-  <div class="list">
-    <Scroll class="scrollWrapper" :data="stories" ref="scroll">
-      <van-list
-        v-model="loading"
-        :finished="finished"
-        finished-text="没有更多了"
-        @load="onLoad"
-      >
+  <div class="list" v-if="shownStories.length">
+    <Scroll
+      class="scrollWrapper"
+      :data="shownStories"
+      ref="scroll"
+      :pullup="true"
+      @scrollToEnd="pullupLoading"
+    >
+      <div class="scrollContent">
         <StoryCard
-          v-for="(item, index) in stories"
+          v-for="(item, index) in shownStories"
           :key="index"
           :title="item.title"
           :hero="item['featured-champions']"
           :imgUrl="item.background.uri"
+          @imgLoaded="imgLoad"
+          @click.native="toStoryPage(item['story-slug'], item.url)"
         ></StoryCard>
-      </van-list>
+        <van-loading color="#0077B6" v-if="isLoading" />
+        <p v-if="isFinished" class="finishedText">
+          没有更多了
+        </p>
+      </div>
     </Scroll>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import { storyContent, storyData } from "api/story";
-import { List, Cell } from "vant";
+import { storyData } from "api/story";
+import { List, Cell, Loading } from "vant";
 import StoryCard from "./child/StoryCard";
 import Scroll from "components/Scroll/Scroll";
+import { mapMutations } from "vuex";
 export default {
   components: {
     [List.name]: List,
     [Cell.name]: Cell,
+    [Loading.name]: Loading,
     StoryCard,
     Scroll,
   },
   data() {
     return {
       stories: [],
+      shownStories: [],
+      isLoading: false,
+      isFinished: false,
     };
   },
   created() {
     this._showAllStory();
-    this._showStoryDetail();
   },
   methods: {
+    //获取异步数据
     _showAllStory() {
       storyData().then((res) => {
         this.stories = this._normalizeStoryList(res.modules);
+        for (let i = 0; i < 5; i++) {
+          this.shownStories.push(this.stories.shift());
+        }
         console.log(this.stories);
+        console.log(this.shownStories);
       });
     },
+    //整理异步数据为想要的数据
     _normalizeStoryList(resModules) {
       resModules = resModules
         .filter((x) => {
@@ -60,25 +78,60 @@ export default {
         });
       return resModules;
     },
-    _showStoryDetail() {
-      storyContent().then((res) => {
-        console.log(res);
+    //图片加载时,刷新scroll
+    imgLoad() {
+      if (!this.checkLoaded) {
+        this.$refs.scroll.refresh();
+        this.checkLoaded = true;
+      }
+    },
+    toStoryPage(name, url) {
+      this.$router.push({
+        path: `/list/${name}`,
       });
+      this.setStoryUrl(url);
+    },
+    ...mapMutations({
+      setStoryUrl: "SET_STORYURL",
+    }),
+    pullupLoading() {
+      //显示加载图片
+      if (this.stories.length) {
+        this.isLoading = true;
+        for (let i = 0; i < 5; i++) {
+          if (!this.stories.length) {
+            break;
+          }
+          this.shownStories.push(this.stories.shift());
+        }
+        setTimeout(() => {
+          this.$refs.scroll.finishPullUp();
+        }, 1000);
+      } else {
+        this.isLoading = false;
+        this.isFinished = true;
+      }
     },
   },
 };
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .list {
   position: fixed;
   width: 100%;
-  top: 50px;
+  top: 44px;
   bottom: 50px;
+
+  .finishedText {
+    font-size: 18px;
+    line-height: 50px;
+    text-align: center;
+  }
 }
 
 .scrollWrapper {
-  height: 100%;
+  height: calc(100vh - 94px);
   overflow: hidden;
 }
 </style>

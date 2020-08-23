@@ -1,22 +1,20 @@
 <template>
   <div class="wrapper">
     <van-row type="flex" justify="center">
-      <van-col class="title" span="22">{{ title }}</van-col>
+      <van-col class="title" span="24">{{ title }}</van-col>
     </van-row>
 
     <van-row type="flex" justify="center">
-      <van-col
-        class="card"
-        span="22"
-        :style="{
-          'background-image': 'url(' + imgUrl + ')',
-        }"
-      >
+      <van-col class="card" span="24">
+        <div class="image">
+          <img v-lazy="imgUrl" @load="imgLoad" />
+        </div>
         <van-row class="name">
           <van-col
             class="heroName"
             v-for="(item, index) in hero"
             :key="index"
+            :style="{ backgroundColor: HeroColor[index] }"
             >{{ item.name }}</van-col
           >
         </van-row>
@@ -32,9 +30,14 @@ export default {
     [Col.name]: Col,
     [Row.name]: Row,
   },
+  methods: {
+    imgLoad() {
+      this.$emit("imgLoaded");
+    },
+  },
   data() {
     return {
-      HeroColor: ["#247ba0", "#50514f", "f25f5c", "ffe066", "#70c1b3"],
+      HeroColor: ["#247ba0", "#f25f5c", "#50514f", "#43aa8b", "#00171f"],
     };
   },
   props: {
@@ -56,22 +59,40 @@ export default {
 };
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 @import '~common/stylus/variable.styl';
 
 .wrapper {
-  margin-top: 15px;
+  margin-left: 2.5%;
+  margin-right: 2.5%;
+  position: relative;
+  margin-top: 10px;
+  top: 10px;
+  margin-bottom: 10px;
+  box-shadow: 2px -2px 6px 0px #434a4e9e;
+  border-radius: 12px;
 }
 
 .card {
   position: relative;
   box-sizing: border-box;
-  padding: 30px 5px;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-  background-size: cover;
-  background-position-y: -10px;
-  background-repeat: no-repeat;
+  font-size: 0;
+}
+
+.image {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 12rem;
+
+  img {
+    height: 100%;
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
 }
 
 .title {
@@ -89,9 +110,9 @@ export default {
   z-index: 10;
   top: 0;
   left: 0;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
-  line-height: 18px;
+  line-height: 24px;
 }
 
 .heroName {

@@ -1,13 +1,22 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import List from "../views/List/List.vue";
+import Story from "../views/Story/Story.vue";
 
 Vue.use(VueRouter);
 
 const routes = [{
     path: "/",
+    redirect: "/list",
+  },
+  {
+    path: "/list",
     name: "List",
     component: List,
+    children: [{
+      path: ":url",
+      component: Story,
+    }, ],
   },
   {
     path: "/hero",
@@ -25,7 +34,10 @@ const routes = [{
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import ( /* webpackChunkName: "about" */ "../views/Region/Region.vue"),
+      import (
+        /* webpackChunkName: "about" */
+        "../views/Region/Region.vue"
+      ),
   },
 ];
 
