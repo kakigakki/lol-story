@@ -1,24 +1,15 @@
 <template>
   <div class="content">
-    <Scroll
-      class="scrollWrapper"
-      :data="content.story"
-      ref="scroll"
-      :pullup="true"
-    >
+    <Scroll class="scrollWrapper" :data="content.story" ref="scroll" :pullup="true">
       <div class="scrollContent">
         <p class="title">{{ content.title }}</p>
         <div class="body">
           <div v-for="(item, index) in section" :key="index">
-            <div
-              v-for="(subItem, indey) in item['story-subsections']"
-              :key="indey"
-            >
+            <div v-for="(subItem, indey) in item['story-subsections']" :key="indey">
               <div class="bodyPart" v-html="subItem.content"></div>
             </div>
           </div>
         </div>
-        {{ content }}
       </div>
     </Scroll>
   </div>
@@ -62,13 +53,13 @@ export default {
   border-radius: 12px;
 
   .scrollWrapper {
-    height: calc(100vh - 138px);
+    height: 100vh;
     overflow: hidden;
 
     .title {
       font-size: 28px;
       line-height: 40px;
-      padding: 50px 20px 50px 20px;
+      padding: 50px 20px 70px 20px;
     }
 
     .body {
@@ -80,12 +71,13 @@ export default {
       border-radius: 12px;
       padding: 20px;
       box-sizing: border-box;
+      bottom: 20px;
 
       .bodyPart {
         font-size: 17px;
-        line-height: 1.75em;
+        line-height: 2em;
 
-        hr {
+        &>>>hr {
           border: none;
           border-top: 1px solid rgba(91, 90, 86, 0.3);
           margin: 30px 0;

@@ -1,3 +1,4 @@
 export default {
-  getStoryUrl: (state) => state.storyUrl,
+    getStoryUrl: (state) => state.storyUrl,
+    getIsTabbarShow: (state) => state.isTabarShow,
 };

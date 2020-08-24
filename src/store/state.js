@@ -1,3 +1,4 @@
 export default {
-  storyUrl: "",
+    storyUrl: "",
+    isTabarShow: true
 };

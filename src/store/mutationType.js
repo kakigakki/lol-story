@@ -1,1 +1,2 @@
 export const SET_STORYURL = "SET_STORYURL";
+export const SET_TABBAR_SHOW = "SET_TABBAR_SHOW";

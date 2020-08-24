@@ -1,17 +1,25 @@
 <template>
   <transition name="slide" appear>
     <div class="story">
-      <van-row class="head">
-        <van-col span="1">
+      <van-row class="head" :class="{active:isUIShow}" align="center">
+        <van-col span="3">
           <van-icon
+            class="icon"
             name="arrow-left"
             color="#0077B6"
-            size="44"
+            size="25"
             @click.native="backToList"
           />
         </van-col>
-        <van-col class="title" offset="2">
-          斩断
+        <van-col class="title" span="18">{{chineseVer.title}}</van-col>
+        <van-col class="title" span="3">
+          <van-icon
+            class="icon"
+            name="setting-o"
+            color="#0077B6"
+            size="25"
+            @click.native="showPopup"
+          />
         </van-col>
       </van-row>
       <van-tabs
@@ -22,23 +30,30 @@
         class="tabs"
         v-if="Object.keys(chineseVer).length"
       >
-        <van-tab title="标签 1">
+        <van-tab title="中文">
           <van-list>
-            <Content :content="chineseVer" />
+            <Content :content="chineseVer" @click.native="showUI" />
           </van-list>
         </van-tab>
-        <van-tab title="标签 2">内容 2</van-tab>
-        <van-tab title="标签 3">内容 3</van-tab>
-        <van-tab title="标签 4">内容 4</van-tab>
+        <van-tab title="日本語">内容 2</van-tab>
+        <van-tab title="English">内容 3</van-tab>
       </van-tabs>
+
+      <van-popup
+        v-model="isPopupShow"
+        round
+        position="bottom"
+        :style="{ height: '30%' }"
+        @closed="closePopup"
+      >内容</van-popup>
     </div>
   </transition>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import { storyContent } from "api/story";
-import { Icon, Row, Col, Tab, Tabs, List } from "vant";
+import { Icon, Row, Col, Tab, Tabs, List, Popup } from "vant";
 import { StoryCon } from "common/js/story.js";
 import Content from "./child/Content";
 
@@ -47,6 +62,8 @@ export default {
     return {
       active: 0,
       chineseVer: {},
+      isUIShow: false,
+      isPopupShow: false,
     };
   },
   computed: {
@@ -61,9 +78,14 @@ export default {
     [Tab.name]: Tab,
     [Tabs.name]: Tabs,
     [List.name]: List,
+    [Popup.name]: Popup,
     Content,
   },
   created() {
+    console.log(this.storyUrl);
+    if (this.storyUrl === "") {
+      this.$router.back();
+    }
     this._showStoryDetail(this.storyUrl);
   },
   methods: {
@@ -80,6 +102,39 @@ export default {
     backToList() {
       this.$router.back();
     },
+    showUI() {
+      this.isUIShow = !this.isUIShow;
+    },
+    showPopup() {
+      this.toggleTabbar(false);
+      setTimeout(() => {
+        this.isPopupShow = true;
+      }, 100);
+    },
+    closePopup() {
+      this.toggleTabbar(true);
+    },
+    ...mapMutations({
+      toggleTabbar: "SET_TABBAR_SHOW",
+    }),
+  },
+  watch: {
+    isUIShow(nVal) {
+      if (nVal) {
+        this.toggleTabbar(true);
+      } else {
+        this.toggleTabbar(false);
+      }
+    },
+  },
+  beforeRouteEnter(to, from, next) {
+    //因为此时获取不到this，所以用from来拿到vuex中的数据
+    from?.matched[0]?.instances?.default?.toggleTabbar(false);
+    next();
+  },
+  beforeRouteLeave(to, from, next) {
+    this.toggleTabbar(true);
+    next();
   },
 };
 </script>
@@ -98,7 +153,8 @@ export default {
   background: $color-background;
 
   .tabs {
-    top: 44px;
+    transform: translate3d(0, -44px, 0);
+    transition: 0.3s all;
   }
 
   .head {
@@ -107,11 +163,28 @@ export default {
     height: 44px;
     width: 100%;
     background-color: $color-card;
+    transition: 0.3s all;
+    transform: translate3d(0, -100%, 0);
+
+    .van-col {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     .title {
-      font-size: 20px;
+      font-size: 18px;
       line-height: 44px;
       no-wrap();
+    }
+
+    &.active {
+      transform: translate3d(0, 0, 0);
+    }
+
+    &.active ~ .tabs {
+      transform: translate3d(0, 44px, 0);
     }
   }
 }

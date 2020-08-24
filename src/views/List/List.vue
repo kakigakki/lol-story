@@ -18,9 +18,7 @@
           @click.native="toStoryPage(item['story-slug'], item.url)"
         ></StoryCard>
         <van-loading color="#0077B6" v-if="isLoading" />
-        <p v-if="isFinished" class="finishedText">
-          没有更多了
-        </p>
+        <p v-if="isFinished" class="finishedText">没有更多了</p>
       </div>
     </Scroll>
     <router-view></router-view>
@@ -94,6 +92,7 @@ export default {
     //获取故事url
     ...mapMutations({
       setStoryUrl: "SET_STORYURL",
+      toggleTabbar: "SET_TABBAR_SHOW",
     }),
     //上拉刷新事件
     pullupLoading() {
