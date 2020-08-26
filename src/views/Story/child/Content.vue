@@ -72,6 +72,7 @@ export default {
       padding: 20px;
       box-sizing: border-box;
       bottom: 20px;
+      box-shadow: 0px -2px 9px 0px rgba(67, 74, 78, 0.62);
 
       .bodyPart {
         font-size: 17px;

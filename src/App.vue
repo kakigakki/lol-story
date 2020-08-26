@@ -23,8 +23,10 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="stylus">
 #app {
+  height: 100vh;
+  position: relative;
   text-align: center;
   color: #2c3e50;
 }
