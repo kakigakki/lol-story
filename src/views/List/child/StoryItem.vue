@@ -2,7 +2,14 @@
   <div class="item">
     <van-row type="flex" justify="center" align="center" class="wrapper">
       <van-col span="2" offset="1">
-        <van-circle v-model="currentRate" size="30" class="circle" />
+        <van-circle
+          layer-color="#e9eaea"
+          v-model="currentRate"
+          size="30px"
+          stroke-width="100"
+          rate="10"
+          class="circle"
+        />
       </van-col>
       <van-col class="title" span="22">{{ title }}</van-col>
       <van-row class="name">
@@ -28,7 +35,7 @@ export default {
   data() {
     return {
       HeroColor: ["#247ba0", "#f25f5c", "#50514f", "#43aa8b", "#00171f"],
-      currentRate: 50,
+      currentRate: 0,
     };
   },
   props: {

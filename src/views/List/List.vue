@@ -7,10 +7,11 @@
       ref="scroll"
       :pullup="true"
       @scrollToEnd="pullupLoading"
+      :probeType="3"
     >
       <div class="scrollContent">
-        <transition name="slide">
-          <div class="storyItem" v-if="isList" :key="1">
+        <transition name="slide" appear mode="out-in">
+          <div v-if="isList" class="storyItem" key="1">
             <StoryItem
               v-for="(item, index) in shownStoriesList"
               :key="index"
@@ -18,8 +19,10 @@
               :hero="item['featured-champions']"
               @click.native="toStoryPage(item['story-slug'], item.url)"
             ></StoryItem>
+            <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
+            <p v-if="isFinished" class="finishedText">没有更多了</p>
           </div>
-          <div class="storyCard" v-else :key="2">
+          <div v-else class="storyCard" key="2">
             <StoryCard
               v-for="(item, index) in shownStoriesCard"
               :key="index"
@@ -28,10 +31,10 @@
               :imgUrl="item.background.uri"
               @click.native="toStoryPage(item['story-slug'], item.url)"
             ></StoryCard>
+            <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
+            <p v-if="isFinished" class="finishedText">没有更多了</p>
           </div>
         </transition>
-        <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
-        <p v-if="isFinished" class="finishedText">没有更多了</p>
       </div>
     </Scroll>
     <router-view></router-view>
@@ -63,14 +66,11 @@ export default {
       shownStoriesList: [],
       isLoading: false,
       isFinished: false,
-      isList: false,
+      isList: true,
     };
   },
   created() {
-    //列表模式中已经展示的数量
-    this.shownListNum = 0;
-    //卡片模式中已经展示的数量
-    this.shownCardNum = 0;
+    //let localStories = JSON.parse(localStorage.getItem("stories"));
     this._showAllStory();
   },
   methods: {
@@ -111,6 +111,7 @@ export default {
         this.checkLoaded = true;
       }
     },
+    //跳转到阅读界面
     toStoryPage(name, url) {
       this.$router.push({
         path: `/list/${name}`,
@@ -126,45 +127,35 @@ export default {
     pullupLoading() {
       if (this.isList) {
         //列表模式加载，一次30条
-        if (this.stories.length != this.shownStoriesList.length) {
-          this.isLoading = true;
-          this.isFinished = false;
-          const shownLen = this.shownStoriesList.length;
-          for (let i = shownLen; i < shownLen + 30; i++) {
-            if (this.stories.length === this.shownStoriesList.length) {
-              break;
-            }
-            this.shownStoriesList.push(this.stories[i]);
-          }
-          this.$refs.scroll.finishPullUp();
-        } else {
-          //没有更多的结果时,设置为加载图片隐藏
-          this.isLoading = false;
-          this.isFinished = true;
-        }
+        this._pullupLoadData(this.shownStoriesList, 30);
       } else {
         //卡片模式加载，一次5条
-        if (this.stories.length != this.shownStoriesCard.length) {
-          this.isLoading = true;
-          this.isFinished = false;
-          const shownLen = this.shownStoriesCard.length;
-          for (let i = shownLen; i < shownLen + 5; i++) {
-            if (this.stories.length === this.shownStoriesCard.length) {
-              break;
-            }
-            this.shownStoriesCard.push(this.stories[i]);
-          }
-          this.$refs.scroll.finishPullUp();
-        } else {
-          //没有更多的结果时,设置为加载图片隐藏
-          this.isLoading = false;
-          this.isFinished = true;
-        }
+        this._pullupLoadData(this.shownStoriesCard, 5);
       }
       this.$refs.scroll.refresh();
     },
+    //改变模式
     changeListView() {
       this.isList = !this.isList;
+    },
+    //上拉加载
+    _pullupLoadData(list, nums) {
+      if (this.stories.length != list.length) {
+        this.isLoading = true;
+        this.isFinished = false;
+        const shownLen = list.length;
+        for (let i = shownLen; i < shownLen + nums; i++) {
+          if (this.stories.length === list.length) {
+            break;
+          }
+          list.push(this.stories[i]);
+        }
+        this.$refs.scroll.finishPullUp();
+      } else {
+        //没有更多的结果时,设置为加载图片隐藏
+        this.isLoading = false;
+        this.isFinished = true;
+      }
     },
   },
 };
@@ -194,11 +185,11 @@ export default {
   }
 }
 
-.slide-enter-active, .slide-leave-active {
-  transition: 2s all;
+.slide-leave-to, .slide-enter {
+  transform: translate3d(-100%, 0, 0);
 }
 
-.slide-enter, .slide-leave-to {
-  transform: translate3d(-100%, 0, 0);
+.slide-enter-active, .slide-leave-active {
+  transition: 0.2s all;
 }
 </style>

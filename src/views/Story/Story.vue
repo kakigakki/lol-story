@@ -82,9 +82,9 @@ export default {
     Content,
   },
   created() {
-    console.log(this.storyUrl);
     if (this.storyUrl === "") {
       this.$router.back();
+      return;
     }
     this._showStoryDetail(this.storyUrl);
   },
@@ -130,6 +130,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     //因为此时获取不到this，所以用from来拿到vuex中的数据
     from?.matched[0]?.instances?.default?.toggleTabbar(false);
+
     next();
   },
   beforeRouteLeave(to, from, next) {

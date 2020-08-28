@@ -1,7 +1,15 @@
 <template>
   <div class="content">
-    <Scroll class="scrollWrapper" :data="content.story" ref="scroll" :pullup="true">
-      <div class="scrollContent">
+    <Scroll
+      class="scrollWrapper"
+      :data="content.story"
+      ref="scroll"
+      :pullup="true"
+      :listenScroll="true"
+      @scroll="scroll"
+      :probeType="2"
+    >
+      <div class="scrollContent" ref="scrollContent">
         <p class="title">{{ content.title }}</p>
         <div class="body">
           <div v-for="(item, index) in section" :key="index">
@@ -21,8 +29,10 @@ export default {
   components: {
     Scroll,
   },
-  mounted() {
-    console.log(this.content);
+  data() {
+    return {
+      readRatio: 0,
+    };
   },
   props: {
     content: {
@@ -32,13 +42,30 @@ export default {
       },
     },
   },
+  mounted() {
+    //取得文章高度
+    this.contentHeight = this.$refs.scrollContent.clientHeight;
+    console.dir(this.$refs.scrollContent);
+  },
   computed: {
+    //大段落。一般一篇文章就一段
     section() {
       let section = [];
       for (let i = 0; i < this.content.story.length; i++) {
         section.push(this.content.story[i]);
       }
       return section;
+    },
+  },
+  methods: {
+    //滚动获得y得高度，判断阅读得百分比
+    scroll(pos) {
+      //阅读百分比
+      this.readRatio = (-pos.y + window.innerHeight) / this.contentHeight;
+      if (this.readRatio > 1) {
+        //阻止误差
+        this.readRatio = 1;
+      }
     },
   },
 };
