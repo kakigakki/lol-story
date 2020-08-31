@@ -14,7 +14,7 @@
         <div class="body">
           <div v-for="(item, index) in section" :key="index">
             <div v-for="(subItem, indey) in item['story-subsections']" :key="indey">
-              <div class="bodyPart" v-html="subItem.content"></div>
+              <div class="bodyPart" v-html="subItem.content" ref="p"></div>
             </div>
           </div>
         </div>
@@ -25,13 +25,17 @@
 
 <script>
 import Scroll from "components/Scroll/Scroll";
+//固定划分线HR的高度
+const HR_HEIGHT = 61;
 export default {
   components: {
     Scroll,
   },
   data() {
     return {
-      readRatio: 0,
+      readRatio: 0, //进度条比例
+      allP: [], //存储所有p元素和hr元素
+      allHeight: [0], //p元素的前缀和数组
     };
   },
   props: {
@@ -45,7 +49,9 @@ export default {
   mounted() {
     //取得文章高度
     this.contentHeight = this.$refs.scrollContent.clientHeight;
-    console.dir(this.$refs.scrollContent);
+    this.$refs.p.forEach((x) => this._getP(x));
+    this._calcHeight(this.allP);
+    console.log(this.allHeight);
   },
   computed: {
     //大段落。一般一篇文章就一段
@@ -65,6 +71,28 @@ export default {
       if (this.readRatio > 1) {
         //阻止误差
         this.readRatio = 1;
+      }
+    },
+    //获取所有的p元素，包括hr元素
+    _getP(arr) {
+      if (arr.nodeName === "P") {
+        arr.clientRect = arr.getBoundingClientRect();
+        this.allP.push(arr);
+        return;
+      }
+      if (arr.nodeName === "HR") {
+        //固定划分线的高度
+        arr.clientRect = {};
+        arr.clientRect.height = HR_HEIGHT;
+        this.allP.push(arr);
+        return;
+      }
+      if (arr.children.length) arr.children.forEach((x) => this._getP(x));
+    },
+    //计算出所有p元素的前缀和，用于滚动时，求出当前在哪个p
+    _calcHeight(allP) {
+      for (let i = 0; i < allP.length; i++) {
+        this.allHeight.push(this.allHeight[i] + allP[i].clientRect.height);
       }
     },
   },
