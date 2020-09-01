@@ -1,4 +1,5 @@
 export default {
     storyUrl: "",
-    isTabarShow: true
+    isTabarShow: true,
+    currentIndex: 0
 };

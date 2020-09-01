@@ -7,4 +7,7 @@ export default {
     [types.SET_TABBAR_SHOW](state, isShow) {
         state.isTabarShow = isShow;
     },
+    [types.SET_CURRENT_POS_INDEX](state, curIdx) {
+        state.currentIndex = curIdx
+    }
 };

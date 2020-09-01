@@ -116,6 +116,7 @@ export default {
       this.$router.push({
         path: `/list/${name}`,
       });
+      url = url.replace("/zh_cn", "");
       this.setStoryUrl(url);
     },
     //设置故事url

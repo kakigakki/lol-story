@@ -1,7 +1,7 @@
 <template>
   <transition name="slide" appear>
     <div class="story">
-      <van-row class="head" :class="{active:isUIShow}" align="center">
+      <van-row class="head" :class="{ active: isUIShow }" align="center">
         <van-col span="3">
           <van-icon
             class="icon"
@@ -11,7 +11,7 @@
             @click.native="backToList"
           />
         </van-col>
-        <van-col class="title" span="18">{{chineseVer.title}}</van-col>
+        <van-col class="title" span="18">{{ chineseVer.title }}</van-col>
         <van-col class="title" span="3">
           <van-icon
             class="icon"
@@ -29,14 +29,35 @@
         sticky
         class="tabs"
         v-if="Object.keys(chineseVer).length"
+        :lazy-render="false"
       >
         <van-tab title="中文">
-          <van-list>
-            <Content :content="chineseVer" @click.native="showUI" />
-          </van-list>
+          <Content
+            @scroll="chineseScroll"
+            @contentheight="chineseHeight"
+            :content="chineseVer"
+            @click.native="showUI"
+            :scrollto="currentPos"
+          />
         </van-tab>
-        <van-tab title="日本語">内容 2</van-tab>
-        <van-tab title="English">内容 3</van-tab>
+        <van-tab title="日本語" v-if="Object.keys(japaneseVer).length">
+          <Content
+            @scroll="japaneseScroll"
+            @contentheight="japaneseHeight"
+            :content="japaneseVer"
+            @click.native="showUI"
+            :scrollto="currentPos"
+          />
+        </van-tab>
+        <van-tab title="English" v-if="Object.keys(englishVer).length">
+          <Content
+            @scroll="englishScroll"
+            @contentheight="englishHeight"
+            :content="englishVer"
+            @click.native="showUI"
+            :scrollto="currentPos"
+          />
+        </van-tab>
       </van-tabs>
 
       <van-popup
@@ -45,17 +66,22 @@
         position="bottom"
         :style="{ height: '30%' }"
         @closed="closePopup"
-      >内容</van-popup>
+        >内容</van-popup
+      >
     </div>
   </transition>
 </template>
 
 <script>
 import { mapGetters, mapMutations } from "vuex";
-import { storyContent } from "api/story";
+import { storyContent, storyContent2 } from "api/story";
 import { Icon, Row, Col, Tab, Tabs, List, Popup } from "vant";
 import { StoryCon } from "common/js/story.js";
 import Content from "./child/Content";
+
+const CH = 0;
+const JA = 1;
+const EN = 2;
 
 export default {
   data() {
@@ -64,6 +90,13 @@ export default {
       chineseVer: {},
       isUIShow: false,
       isPopupShow: false,
+      japaneseVer: {},
+      englishVer: {},
+      storyHeight: {
+        chinese: null,
+        japanese: null,
+        english: null,
+      },
     };
   },
   computed: {
@@ -82,6 +115,8 @@ export default {
     Content,
   },
   created() {
+    this.currentPos = 0;
+    this.currentPosIndex = 0;
     if (this.storyUrl === "") {
       this.$router.back();
       return;
@@ -90,14 +125,44 @@ export default {
   },
   methods: {
     _showStoryDetail(uri) {
-      storyContent(uri).then((res) => {
-        console.log(res);
+      //中文版本
+      let sendUri = "";
+      sendUri = `/zh_cn${uri}`;
+      storyContent(sendUri).then((res) => {
         this.chineseVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
           res.story["story-sections"]
         );
       });
+      //日文版本
+      sendUri = `/ja_jp${uri}`;
+      storyContent2(sendUri).then((res) => {
+        this.japaneseVer = new StoryCon(
+          res.story.title,
+          res.story.subtitle,
+          res.story["story-sections"]
+        );
+      });
+
+      //英文版本
+      sendUri = `/en_us${uri}`;
+      storyContent2(sendUri).then((res) => {
+        this.englishVer = new StoryCon(
+          res.story.title,
+          res.story.subtitle,
+          res.story["story-sections"]
+        );
+      });
+    },
+    _getCurrentPosIndex(heights) {
+      for (let i = 0; i < heights.length - 1; i++) {
+        if (this.currentPos >= heights[i] && this.currentPos < heights[i + 1]) {
+          console.log(this.currentPos);
+          return i;
+        }
+      }
+      return heights.length - 1;
     },
     backToList() {
       this.$router.back();
@@ -114,8 +179,33 @@ export default {
     closePopup() {
       this.toggleTabbar(true);
     },
+    chineseScroll(posY) {
+      //获取中文版滚动距离
+      this.currentPos = posY;
+    },
+    japaneseScroll(posY) {
+      //获取中文版滚动距离
+      this.currentPos = posY;
+    },
+    englishScroll(posY) {
+      //获取中文版滚动距离
+      this.currentPos = posY;
+    },
+    chineseHeight(height) {
+      //获取中文版内容高度前缀和
+      this.storyHeight.chinese = height;
+    },
+    japaneseHeight(height) {
+      //获取日文版内容高度前缀和
+      this.storyHeight.japanese = height;
+    },
+    englishHeight(height) {
+      //获取英文版内容高度前缀和
+      this.storyHeight.english = height;
+    },
     ...mapMutations({
       toggleTabbar: "SET_TABBAR_SHOW",
+      setCurrentPosIndex: "SET_CURRENT_POS_INDEX",
     }),
   },
   watch: {
@@ -126,11 +216,35 @@ export default {
         this.toggleTabbar(false);
       }
     },
+    active(nVal, oVal) {
+      switch (oVal) {
+        case CH:
+          this.currentPosIndex = this._getCurrentPosIndex(
+            this.storyHeight.chinese
+          );
+          console.log(this.currentPosIndex);
+          break;
+        case JA:
+          this.currentPosIndex = this._getCurrentPosIndex(
+            this.storyHeight.japanese
+          );
+          console.log(this.currentPosIndex);
+          break;
+        case EN:
+          this.currentPosIndex = this._getCurrentPosIndex(
+            this.storyHeight.english
+          );
+          console.log(this.currentPosIndex);
+          break;
+        default:
+          break;
+      }
+      this.setCurrentPosIndex(this.currentPosIndex);
+    },
   },
   beforeRouteEnter(to, from, next) {
     //因为此时获取不到this，所以用from来拿到vuex中的数据
     from?.matched[0]?.instances?.default?.toggleTabbar(false);
-
     next();
   },
   beforeRouteLeave(to, from, next) {

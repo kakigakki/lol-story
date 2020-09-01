@@ -13,7 +13,10 @@
         <p class="title">{{ content.title }}</p>
         <div class="body">
           <div v-for="(item, index) in section" :key="index">
-            <div v-for="(subItem, indey) in item['story-subsections']" :key="indey">
+            <div
+              v-for="(subItem, indey) in item['story-subsections']"
+              :key="indey"
+            >
               <div class="bodyPart" v-html="subItem.content" ref="p"></div>
             </div>
           </div>
@@ -25,6 +28,7 @@
 
 <script>
 import Scroll from "components/Scroll/Scroll";
+import { mapGetters } from "vuex";
 //固定划分线HR的高度
 const HR_HEIGHT = 61;
 export default {
@@ -45,13 +49,19 @@ export default {
         return {};
       },
     },
+    currentPos: {
+      type: Number,
+      default: 0,
+    },
   },
   mounted() {
     //取得文章高度
     this.contentHeight = this.$refs.scrollContent.clientHeight;
     this.$refs.p.forEach((x) => this._getP(x));
     this._calcHeight(this.allP);
-    console.log(this.allHeight);
+    this.$nextTick(() => {
+      this.$emit("contentheight", this.allHeight);
+    });
   },
   computed: {
     //大段落。一般一篇文章就一段
@@ -62,20 +72,26 @@ export default {
       }
       return section;
     },
+    ...mapGetters({
+      currentPosIndex: "getCurrentIndex",
+    }),
   },
   methods: {
     //滚动获得y得高度，判断阅读得百分比
     scroll(pos) {
+      let posY = -pos.y;
       //阅读百分比
-      this.readRatio = (-pos.y + window.innerHeight) / this.contentHeight;
+      this.readRatio = (posY + window.innerHeight) / this.contentHeight;
       if (this.readRatio > 1) {
         //阻止误差
         this.readRatio = 1;
       }
+      this.$emit("scroll", posY);
     },
     //获取所有的p元素，包括hr元素
     _getP(arr) {
-      if (arr.nodeName === "P") {
+      if (arr.nodeName === "P" && arr.innerText !== "***") {
+        //因为日文中有***作为引用符号，所有需要去掉，保证每个版本的高度一致
         arr.clientRect = arr.getBoundingClientRect();
         this.allP.push(arr);
         return;
@@ -94,6 +110,12 @@ export default {
       for (let i = 0; i < allP.length; i++) {
         this.allHeight.push(this.allHeight[i] + allP[i].clientRect.height);
       }
+    },
+  },
+  watch: {
+    currentPosIndex(nVal) {
+      const posY = this.allHeight[nVal];
+      this.$refs.scroll.scrollTo(0, -posY);
     },
   },
 };
