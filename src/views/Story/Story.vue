@@ -37,7 +37,6 @@
             @contentheight="chineseHeight"
             :content="chineseVer"
             @click.native="showUI"
-            :scrollto="currentPos"
           />
         </van-tab>
         <van-tab title="日本語" v-if="Object.keys(japaneseVer).length">
@@ -46,7 +45,6 @@
             @contentheight="japaneseHeight"
             :content="japaneseVer"
             @click.native="showUI"
-            :scrollto="currentPos"
           />
         </van-tab>
         <van-tab title="English" v-if="Object.keys(englishVer).length">
@@ -55,7 +53,6 @@
             @contentheight="englishHeight"
             :content="englishVer"
             @click.native="showUI"
-            :scrollto="currentPos"
           />
         </van-tab>
       </van-tabs>
@@ -66,8 +63,7 @@
         position="bottom"
         :style="{ height: '30%' }"
         @closed="closePopup"
-        >内容</van-popup
-      >
+      >内容</van-popup>
     </div>
   </transition>
 </template>
@@ -115,7 +111,11 @@ export default {
     Content,
   },
   created() {
-    this.currentPos = 0;
+    this.currentPos = {
+      chinese: 0,
+      japanese: 0,
+      english: 0,
+    };
     this.currentPosIndex = 0;
     if (this.storyUrl === "") {
       this.$router.back();
@@ -155,10 +155,9 @@ export default {
         );
       });
     },
-    _getCurrentPosIndex(heights) {
+    _getCurrentPosIndex(heights, currentPos) {
       for (let i = 0; i < heights.length - 1; i++) {
-        if (this.currentPos >= heights[i] && this.currentPos < heights[i + 1]) {
-          console.log(this.currentPos);
+        if (currentPos >= heights[i] && currentPos < heights[i + 1]) {
           return i;
         }
       }
@@ -181,15 +180,15 @@ export default {
     },
     chineseScroll(posY) {
       //获取中文版滚动距离
-      this.currentPos = posY;
+      this.currentPos.chinese = posY;
     },
     japaneseScroll(posY) {
-      //获取中文版滚动距离
-      this.currentPos = posY;
+      //获取日文版滚动距离
+      this.currentPos.japanese = posY;
     },
     englishScroll(posY) {
-      //获取中文版滚动距离
-      this.currentPos = posY;
+      //获取英文版滚动距离
+      this.currentPos.english = posY;
     },
     chineseHeight(height) {
       //获取中文版内容高度前缀和
@@ -220,25 +219,26 @@ export default {
       switch (oVal) {
         case CH:
           this.currentPosIndex = this._getCurrentPosIndex(
-            this.storyHeight.chinese
+            this.storyHeight.chinese,
+            this.currentPos.chinese
           );
-          console.log(this.currentPosIndex);
           break;
         case JA:
           this.currentPosIndex = this._getCurrentPosIndex(
-            this.storyHeight.japanese
+            this.storyHeight.japanese,
+            this.currentPos.japanese
           );
-          console.log(this.currentPosIndex);
           break;
         case EN:
           this.currentPosIndex = this._getCurrentPosIndex(
-            this.storyHeight.english
+            this.storyHeight.english,
+            this.currentPos.english
           );
-          console.log(this.currentPosIndex);
           break;
         default:
           break;
       }
+      //将旧的标签滚到的index存进vuex中，然后在新的标签中调用
       this.setCurrentPosIndex(this.currentPosIndex);
     },
   },
