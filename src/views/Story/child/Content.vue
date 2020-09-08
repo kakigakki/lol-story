@@ -11,7 +11,7 @@
     >
       <div class="scrollContent" ref="scrollContent">
         <p class="title">{{ content.title }}</p>
-        <div class="body">
+        <div class="body" ref="body">
           <div v-for="(item, index) in section" :key="index">
             <div
               v-for="(subItem, indey) in item['story-subsections']"
@@ -22,6 +22,8 @@
           </div>
         </div>
       </div>
+
+      <div class="progressBar" ref="progressBar" v-show="isProgressShow"></div>
     </Scroll>
   </div>
 </template>
@@ -53,6 +55,14 @@ export default {
       type: Number,
       default: 0,
     },
+    fontSize: {
+      type: Number,
+      default: 17,
+    },
+    isProgressShow: {
+      type: Boolean,
+      default: true,
+    },
   },
   mounted() {
     //取得文章高度
@@ -81,10 +91,10 @@ export default {
     scroll(pos) {
       let posY = -pos.y;
       //阅读百分比
-      this.readRatio = (posY + window.innerHeight) / this.contentHeight;
-      if (this.readRatio > 1) {
+      this.readRatio = ((posY + window.innerHeight) / this.contentHeight) * 100;
+      if (this.readRatio > 100) {
         //阻止误差
-        this.readRatio = 1;
+        this.readRatio = 100;
       }
       this.$emit("scroll", posY);
     },
@@ -114,8 +124,17 @@ export default {
   },
   watch: {
     currentPosIndex(nVal) {
+      //根据当前其段落的索引,自动跳段,三个语言都是同样操作
       const posY = this.allHeight[nVal];
       this.$refs.scroll.scrollTo(0, -posY);
+    },
+    fontSize(nVal) {
+      //修改字体大小
+      console.log(nVal);
+      this.$refs.body.style.fontSize = `${nVal}px`;
+    },
+    readRatio(nVal) {
+      this.$refs.progressBar.style.height = `${nVal}vh`;
     },
   },
 };
@@ -150,17 +169,25 @@ export default {
       box-sizing: border-box;
       bottom: 20px;
       box-shadow: 0px -2px 9px 0px rgba(67, 74, 78, 0.62);
+      font-size: 17px;
+      line-height: 2em;
 
       .bodyPart {
-        font-size: 17px;
-        line-height: 2em;
-
         &>>>hr {
           border: none;
           border-top: 1px solid rgba(91, 90, 86, 0.3);
           margin: 30px 0;
         }
       }
+    }
+
+    .progressBar {
+      position: fixed;
+      top: 0;
+      width: 2px;
+      overflow: hidden;
+      height: 0;
+      background: $color-theme;
     }
   }
 }
