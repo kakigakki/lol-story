@@ -172,7 +172,6 @@ export default {
       english: 0,
     };
     this.currentPosIndex = 0;
-    console.log(this.storyUrl);
     if (this.storyUrl === "") {
       this.$router.back();
       return;
@@ -188,7 +187,8 @@ export default {
         this.chineseVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
-          res.story["story-sections"]
+          res.story["story-sections"],
+          "chinese"
         );
       });
       //日文版本
@@ -197,7 +197,8 @@ export default {
         this.japaneseVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
-          res.story["story-sections"]
+          res.story["story-sections"],
+          "japanese"
         );
       });
 
@@ -207,7 +208,8 @@ export default {
         this.englishVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
-          res.story["story-sections"]
+          res.story["story-sections"],
+          "english"
         );
       });
     },

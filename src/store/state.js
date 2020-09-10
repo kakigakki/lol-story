@@ -1,5 +1,6 @@
 export default {
-    storyUrl: "",
-    isTabarShow: true,
-    currentIndex: 0
+  storyUrl: "",
+  isTabarShow: true,
+  currentIndex: 0,
+  hasRead: {}
 };

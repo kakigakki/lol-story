@@ -48,7 +48,7 @@ import StoryCard from "./child/StoryCard";
 import StoryItem from "./child/StoryItem";
 import ToolBar from "./child/ToolBar";
 import Scroll from "components/Scroll/Scroll";
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 export default {
   components: {
     [List.name]: List,
@@ -69,8 +69,16 @@ export default {
       isList: true,
     };
   },
+  computed: {
+    ...mapGetters({
+      lolStories: "getHasRead",
+    }),
+  },
   created() {
-    //let localStories = JSON.parse(localStorage.getItem("stories"));
+    //获得本地阅读进度
+    let localStories = JSON.parse(localStorage.getItem("lolStories"));
+    //将所有阅读进度放入vuex
+    this.setAllStories(localStories);
     this._showAllStory();
   },
   methods: {
@@ -86,8 +94,6 @@ export default {
         for (let i = 0; i < 30; i++) {
           this.shownStoriesList.push(this.stories[i]);
         }
-        console.log(this.stories);
-        console.log(this.shownStoriesCard);
       });
     },
     //整理异步数据为想要的数据
@@ -123,6 +129,7 @@ export default {
     ...mapMutations({
       setStoryUrl: "SET_STORYURL",
       toggleTabbar: "SET_TABBAR_SHOW",
+      setAllStories: "SET_ALL_STORIES",
     }),
     //上拉刷新事件
     pullupLoading() {
@@ -157,6 +164,11 @@ export default {
         this.isLoading = false;
         this.isFinished = true;
       }
+    },
+  },
+  watch: {
+    lolStories(nVal) {
+      console.log(nVal);
     },
   },
 };

@@ -1,3 +1,5 @@
 export const SET_STORYURL = "SET_STORYURL";
 export const SET_TABBAR_SHOW = "SET_TABBAR_SHOW";
 export const SET_CURRENT_POS_INDEX = "SET_CURRENT_POS_INDEX"
+export const SET_HAS_READ = "SET_HAS_READ"
+export const SET_ALL_STORIES = "SET_ALL_STORIES"

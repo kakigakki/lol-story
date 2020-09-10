@@ -30,7 +30,7 @@
 
 <script>
 import Scroll from "components/Scroll/Scroll";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 //固定划分线HR的高度
 const HR_HEIGHT = 61;
 export default {
@@ -72,6 +72,13 @@ export default {
     this.$nextTick(() => {
       this.$emit("contentheight", this.allHeight);
     });
+
+    //页面刷新或者关闭时,将当前阅读的位置存进vuex，并序列化进localStorage
+    window.onbeforeunload = () => {
+      //离开当前页面时，将阅读进度存入vuex,并将vuex的所有值存入本地存储
+      this._save(this.content.title, this.readRatio.toFixed(2));
+      localStorage.setItem("lolStories", JSON.stringify(this.hasRead));
+    };
   },
   computed: {
     //大段落。一般一篇文章就一段
@@ -84,6 +91,7 @@ export default {
     },
     ...mapGetters({
       currentPosIndex: "getCurrentIndex",
+      hasRead: "getHasRead",
     }),
   },
   methods: {
@@ -121,6 +129,18 @@ export default {
         this.allHeight.push(this.allHeight[i] + allP[i].clientRect.height);
       }
     },
+    _save(title, ratio) {
+      if (this.content.lang === "chinese") {
+        let payload = {
+          title: title,
+          ratio: ratio,
+        };
+        this.setHasRead(payload);
+      }
+    },
+    ...mapMutations({
+      setHasRead: "SET_HAS_READ",
+    }),
   },
   watch: {
     currentPosIndex(nVal) {
@@ -136,6 +156,10 @@ export default {
     readRatio(nVal) {
       this.$refs.progressBar.style.height = `${nVal}vh`;
     },
+  },
+  beforeDestroy() {
+    //离开当前页面时，将阅读进度存入vuex
+    this._save(this.content.title, this.readRatio.toFixed(2));
   },
 };
 </script>
