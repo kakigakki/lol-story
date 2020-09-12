@@ -17,6 +17,7 @@
               :key="index"
               :title="item.title"
               :hero="item['featured-champions']"
+              :ratio="item.ratio"
               @click.native="toStoryPage(item['story-slug'], item.url)"
             ></StoryItem>
             <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
@@ -76,9 +77,9 @@ export default {
   },
   created() {
     //获得本地阅读进度
-    let localStories = JSON.parse(localStorage.getItem("lolStories"));
+    this.localStories = JSON.parse(localStorage.getItem("lolStories"));
     //将所有阅读进度放入vuex
-    this.setAllStories(localStories);
+    this.setAllStories(this.localStories);
     this._showAllStory();
   },
   methods: {
@@ -86,6 +87,8 @@ export default {
     _showAllStory() {
       storyData().then((res) => {
         this.stories = this._normalizeStoryList(res.modules);
+        //设置每个故事的本地阅读进度
+        this._setAllReadRatio();
         //初始化卡片模式数据
         for (let i = 0; i < 5; i++) {
           this.shownStoriesCard.push(this.stories[i]);
@@ -108,6 +111,7 @@ export default {
             new Date(a["release-date"]).getTime()
           );
         });
+      console.log(resModules);
       return resModules;
     },
     //图片加载时,刷新scroll
@@ -165,10 +169,62 @@ export default {
         this.isFinished = true;
       }
     },
+    //获取每次回到List页面时,阅读进度的差异
+    _diffObj(obj1, obj2) {
+      const newKeys = Object.keys(obj1);
+      const oldKeys = Object.keys(obj2);
+      let targetStory = {};
+      if (newKeys.length === oldKeys.length) {
+        for (const key in obj1) {
+          if (obj1[key] !== obj2[key]) {
+            targetStory.title = key;
+            targetStory.ratio = obj1[key];
+          }
+        }
+      } else if (oldKeys.length !== 0) {
+        for (const key in obj1) {
+          if (!obj2[key]) {
+            targetStory.title = key;
+            targetStory.ratio = obj1[key];
+          }
+        }
+      }
+      return targetStory;
+    },
+    _setAllReadRatio() {
+      //页面加载时,从localStorage将本地阅读进度加载
+      if (this.lolStories) {
+        const localStoryKeys = Object.keys(this.lolStories);
+        for (let i = 0; i < this.stories.length; i++) {
+          if (localStoryKeys.includes(this.stories[i].title)) {
+            this.stories[i].ratio = this.lolStories[this.stories[i].title];
+          }
+        }
+      }
+    },
   },
   watch: {
-    lolStories(nVal) {
-      console.log(nVal);
+    //当阅读进度发生变化时,更新对应视图
+    lolStories(nVal, oVal) {
+      if (!nVal) return;
+      let ret = this._diffObj(nVal, oVal); //获取每次回到List页面时,阅读进度的差异
+      //如果存在差异就进行List页面相应的视图更新
+      if (Object.keys(ret).length) {
+        for (let i = 0; i < this.shownStoriesList.length; i++) {
+          if (this.shownStoriesList[i].title === ret.title) {
+            if (this.shownStoriesList[i].ratio) {
+              this.shownStoriesList[i].ratio = ret.ratio;
+              //不知道为什么视图不会立即更新,所以加了此方法强制视图进行更新
+              this.$forceUpdate();
+            } else {
+              console.log(this.shownStoriesList[i].title, ret.ratio, 2);
+              this.$set(this.shownStoriesList[i], "ratio", ret.ratio);
+            }
+
+            return;
+          }
+        }
+      }
     },
   },
 };

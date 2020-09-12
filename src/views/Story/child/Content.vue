@@ -90,8 +90,8 @@ export default {
       return section;
     },
     ...mapGetters({
-      currentPosIndex: "getCurrentIndex",
-      hasRead: "getHasRead",
+      currentPosIndex: "getCurrentIndex", //当前段落index
+      hasRead: "getHasRead", //当前阅读进度
     }),
   },
   methods: {
