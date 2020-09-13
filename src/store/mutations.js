@@ -4,6 +4,9 @@ export default {
   [types.SET_STORYURL](state, url) {
     state.storyUrl = url;
   },
+  [types.SET_STORYURL_RATIO](state, urlRatio) {
+    state.storyUrlRatio = urlRatio
+  },
   [types.SET_TABBAR_SHOW](state, isShow) {
     state.isTabarShow = isShow;
   },

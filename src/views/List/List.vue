@@ -18,7 +18,9 @@
               :title="item.title"
               :hero="item['featured-champions']"
               :ratio="item.ratio"
-              @click.native="toStoryPage(item['story-slug'], item.url)"
+              @click.native="
+                toStoryPage(item['story-slug'], item.url, item.ratio)
+              "
             ></StoryItem>
             <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
             <p v-if="isFinished" class="finishedText">没有更多了</p>
@@ -30,7 +32,7 @@
               :title="item.title"
               :hero="item['featured-champions']"
               :imgUrl="item.background.uri"
-              @click.native="toStoryPage(item['story-slug'], item.url)"
+              @click.native="toStoryPage(item['story-slug'], item.url, null)"
             ></StoryCard>
             <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
             <p v-if="isFinished" class="finishedText">没有更多了</p>
@@ -122,16 +124,18 @@ export default {
       }
     },
     //跳转到阅读界面
-    toStoryPage(name, url) {
+    toStoryPage(name, url, ratio) {
       this.$router.push({
         path: `/list/${name}`,
       });
       url = url.replace("/zh_cn", "");
-      this.setStoryUrl(url);
+      this.setStoryUrl(url); //将url保存到vuex,
+      this.setStoryUrlRatio(ratio); //将url对应的阅读进度也保存到vuex
     },
     //设置故事url
     ...mapMutations({
       setStoryUrl: "SET_STORYURL",
+      setStoryUrlRatio: "SET_STORYURL_RATIO",
       toggleTabbar: "SET_TABBAR_SHOW",
       setAllStories: "SET_ALL_STORIES",
     }),
