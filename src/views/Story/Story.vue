@@ -63,7 +63,17 @@
         position="bottom"
         :style="{ height: '30%' }"
         @closed="closePopup"
-      >内容</van-popup>
+        class="popup"
+      >
+      <van-row>
+          <van-col>
+            <van-slider v-model="value" :min="-50" :max="50" />
+          </van-col>
+      </van-row>
+      <van-row>
+          <van-col></van-col>
+      </van-row>
+      </van-popup>
     </div>
   </transition>
 </template>
@@ -71,7 +81,7 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import { storyContent, storyContent2 } from "api/story";
-import { Icon, Row, Col, Tab, Tabs, List, Popup } from "vant";
+import { Icon, Row, Col, Tab, Tabs, List, Popup ,Slider } from "vant";
 import { StoryCon } from "common/js/story.js";
 import Content from "./child/Content";
 
@@ -93,6 +103,7 @@ export default {
         japanese: null,
         english: null,
       },
+      fontSize:0
     };
   },
   computed: {
@@ -108,6 +119,7 @@ export default {
     [Tabs.name]: Tabs,
     [List.name]: List,
     [Popup.name]: Popup,
+    [Slider.name] :Slider,
     Content,
   },
   created() {
@@ -301,6 +313,10 @@ export default {
     &.active ~ .tabs {
       transform: translate3d(0, 44px, 0);
     }
+  }
+
+  .popup{
+    padding 40px
   }
 }
 
