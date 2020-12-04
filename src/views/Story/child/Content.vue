@@ -11,7 +11,7 @@
     >
       <div class="scrollContent" ref="scrollContent">
         <p class="title">{{ content.title }}</p>
-        <div class="body">
+        <div class="body" ref="body">
           <div v-for="(item, index) in section" :key="index">
             <div
               v-for="(subItem, indey) in item['story-subsections']"
@@ -22,13 +22,16 @@
           </div>
         </div>
       </div>
+
+      <div class="progressBar" ref="progressBar" v-show="isProgressShow"></div>
     </Scroll>
   </div>
 </template>
 
 <script>
 import Scroll from "components/Scroll/Scroll";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
+import { Dialog, Notify } from "vant";
 //固定划分线HR的高度
 const HR_HEIGHT = 61;
 export default {
@@ -53,15 +56,32 @@ export default {
       type: Number,
       default: 0,
     },
+    fontSize: {
+      type: Number,
+      default: 17,
+    },
+    isProgressShow: {
+      type: Boolean,
+      default: true,
+    },
   },
   mounted() {
     //取得文章高度
     this.contentHeight = this.$refs.scrollContent.clientHeight;
     this.$refs.p.forEach((x) => this._getP(x));
     this._calcHeight(this.allP);
+
     this.$nextTick(() => {
       this.$emit("contentheight", this.allHeight);
+      this._initPos();
     });
+
+    //页面刷新或者关闭时,将当前阅读的位置存进vuex，并序列化进localStorage
+    window.onbeforeunload = () => {
+      //离开当前页面时，将阅读进度存入vuex,并将vuex的所有值存入本地存储
+      this._save(this.content.title, this.readRatio.toFixed(0));
+      localStorage.setItem("lolStories", JSON.stringify(this.hasRead));
+    };
   },
   computed: {
     //大段落。一般一篇文章就一段
@@ -73,7 +93,9 @@ export default {
       return section;
     },
     ...mapGetters({
-      currentPosIndex: "getCurrentIndex",
+      currentPosIndex: "getCurrentIndex", //当前段落index
+      hasRead: "getHasRead", //所有文章阅的读进度
+      storyUrlRatio: "getStoryUrlRatio", //当前文章的阅读进度
     }),
   },
   methods: {
@@ -81,10 +103,10 @@ export default {
     scroll(pos) {
       let posY = -pos.y;
       //阅读百分比
-      this.readRatio = (posY + window.innerHeight) / this.contentHeight;
-      if (this.readRatio > 1) {
+      this.readRatio = ((posY + window.innerHeight) / this.contentHeight) * 100;
+      if (this.readRatio > 100) {
         //阻止误差
-        this.readRatio = 1;
+        this.readRatio = 100;
       }
       this.$emit("scroll", posY);
     },
@@ -111,12 +133,70 @@ export default {
         this.allHeight.push(this.allHeight[i] + allP[i].clientRect.height);
       }
     },
+    //保存当村阅读进度给vuex中的hasRead(离开路由,或者刷新页面时调用)
+    _save(title, ratio) {
+      if (this.content.lang === "chinese") {
+        let payload = {
+          title: title,
+          ratio: ratio,
+        };
+        this.setHasRead(payload);
+      }
+    },
+    //打开页面时,如果存在本文章的阅读进度的话,自动跳转到阅读进度的位置(只设置中文,其他语言会跟着跳转)
+    _initPos() {
+      if (
+        this.content.lang === "chinese" &&
+        this.storyUrlRatio &&
+        this.storyUrlRatio !== "0"
+      ) {
+        const scrollY = +(
+          (this.storyUrlRatio / 100) * this.contentHeight -
+          window.innerHeight
+        ).toFixed(0);
+
+        //跳出弹窗
+        Dialog.confirm({
+          theme: "round-button",
+          lockScroll: false,
+          confirmButtonColor: "#0077B6",
+          cancelButtonColor: "#e25a5a",
+          message: "是否跳转到上次阅读位置?",
+        })
+          .then(() => {
+            this.$refs.scroll.scrollTo(0, -scrollY, 500);
+            Notify({
+              type: "success",
+              message: "已跳转到上次阅读位置",
+              duration: 800,
+            });
+          })
+          .catch(() => {
+            Notify({ type: "success", message: "从头开始阅读", duration: 800 });
+          });
+      }
+    },
+    ...mapMutations({
+      setHasRead: "SET_HAS_READ",
+    }),
   },
   watch: {
     currentPosIndex(nVal) {
+      //根据当前其段落的索引,自动跳段,三个语言都是同样操作
       const posY = this.allHeight[nVal];
       this.$refs.scroll.scrollTo(0, -posY);
     },
+    fontSize(nVal) {
+      //修改字体大小
+      this.$refs.body.style.fontSize = `${nVal}px`;
+    },
+    readRatio(nVal) {
+      this.$refs.progressBar.style.height = `${nVal}vh`;
+    },
+  },
+  beforeDestroy() {
+    //离开当前页面时，将阅读进度存入vuex
+    this._save(this.content.title, this.readRatio.toFixed(0));
   },
 };
 </script>
@@ -150,17 +230,25 @@ export default {
       box-sizing: border-box;
       bottom: 20px;
       box-shadow: 0px -2px 9px 0px rgba(67, 74, 78, 0.62);
+      font-size: 17px;
+      line-height: 2em;
 
       .bodyPart {
-        font-size: 17px;
-        line-height: 2em;
-
         &>>>hr {
           border: none;
           border-top: 1px solid rgba(91, 90, 86, 0.3);
           margin: 30px 0;
         }
       }
+    }
+
+    .progressBar {
+      position: fixed;
+      top: 0;
+      width: 2px;
+      overflow: hidden;
+      height: 0;
+      background: $color-theme;
     }
   }
 }

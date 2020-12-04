@@ -7,8 +7,9 @@
           v-model="currentRate"
           size="30px"
           stroke-width="100"
-          rate="10"
+          :rate="ratio"
           class="circle"
+          :color="ratio === '0' ? '#e9eaea' : '#0077B6'"
         />
       </van-col>
       <van-col class="title" span="22">{{ title }}</van-col>
@@ -18,7 +19,8 @@
           v-for="(item, index) in hero"
           :key="index"
           :style="{ backgroundColor: HeroColor[index] }"
-        >{{ item.name }}</van-col>
+          >{{ item.name }}</van-col
+        >
       </van-row>
     </van-row>
   </div>
@@ -48,6 +50,10 @@ export default {
       default() {
         return [];
       },
+    },
+    ratio: {
+      type: String,
+      default: "0",
     },
   },
 };

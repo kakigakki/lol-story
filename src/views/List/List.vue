@@ -17,7 +17,10 @@
               :key="index"
               :title="item.title"
               :hero="item['featured-champions']"
-              @click.native="toStoryPage(item['story-slug'], item.url)"
+              :ratio="item.ratio"
+              @click.native="
+                toStoryPage(item['story-slug'], item.url, item.ratio)
+              "
             ></StoryItem>
             <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
             <p v-if="isFinished" class="finishedText">没有更多了</p>
@@ -29,7 +32,7 @@
               :title="item.title"
               :hero="item['featured-champions']"
               :imgUrl="item.background.uri"
-              @click.native="toStoryPage(item['story-slug'], item.url)"
+              @click.native="toStoryPage(item['story-slug'], item.url, null)"
             ></StoryCard>
             <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
             <p v-if="isFinished" class="finishedText">没有更多了</p>
@@ -48,7 +51,7 @@ import StoryCard from "./child/StoryCard";
 import StoryItem from "./child/StoryItem";
 import ToolBar from "./child/ToolBar";
 import Scroll from "components/Scroll/Scroll";
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 export default {
   components: {
     [List.name]: List,
@@ -69,8 +72,16 @@ export default {
       isList: true,
     };
   },
+  computed: {
+    ...mapGetters({
+      lolStories: "getHasRead",
+    }),
+  },
   created() {
-    //let localStories = JSON.parse(localStorage.getItem("stories"));
+    //获得本地阅读进度
+    this.localStories = JSON.parse(localStorage.getItem("lolStories"));
+    //将所有阅读进度放入vuex
+    this.setAllStories(this.localStories);
     this._showAllStory();
   },
   methods: {
@@ -78,6 +89,8 @@ export default {
     _showAllStory() {
       storyData().then((res) => {
         this.stories = this._normalizeStoryList(res.modules);
+        //设置每个故事的本地阅读进度
+        this._setAllReadRatio();
         //初始化卡片模式数据
         for (let i = 0; i < 5; i++) {
           this.shownStoriesCard.push(this.stories[i]);
@@ -86,8 +99,6 @@ export default {
         for (let i = 0; i < 30; i++) {
           this.shownStoriesList.push(this.stories[i]);
         }
-        console.log(this.stories);
-        console.log(this.shownStoriesCard);
       });
     },
     //整理异步数据为想要的数据
@@ -102,6 +113,7 @@ export default {
             new Date(a["release-date"]).getTime()
           );
         });
+      console.log(resModules);
       return resModules;
     },
     //图片加载时,刷新scroll
@@ -112,17 +124,20 @@ export default {
       }
     },
     //跳转到阅读界面
-    toStoryPage(name, url) {
+    toStoryPage(name, url, ratio) {
       this.$router.push({
         path: `/list/${name}`,
       });
       url = url.replace("/zh_cn", "");
-      this.setStoryUrl(url);
+      this.setStoryUrl(url); //将url保存到vuex,
+      this.setStoryUrlRatio(ratio); //将url对应的阅读进度也保存到vuex
     },
     //设置故事url
     ...mapMutations({
       setStoryUrl: "SET_STORYURL",
+      setStoryUrlRatio: "SET_STORYURL_RATIO",
       toggleTabbar: "SET_TABBAR_SHOW",
+      setAllStories: "SET_ALL_STORIES",
     }),
     //上拉刷新事件
     pullupLoading() {
@@ -156,6 +171,63 @@ export default {
         //没有更多的结果时,设置为加载图片隐藏
         this.isLoading = false;
         this.isFinished = true;
+      }
+    },
+    //获取每次回到List页面时,阅读进度的差异
+    _diffObj(obj1, obj2) {
+      const newKeys = Object.keys(obj1);
+      const oldKeys = Object.keys(obj2);
+      let targetStory = {};
+      if (newKeys.length === oldKeys.length) {
+        for (const key in obj1) {
+          if (obj1[key] !== obj2[key]) {
+            targetStory.title = key;
+            targetStory.ratio = obj1[key];
+          }
+        }
+      } else if (oldKeys.length !== 0) {
+        for (const key in obj1) {
+          if (!obj2[key]) {
+            targetStory.title = key;
+            targetStory.ratio = obj1[key];
+          }
+        }
+      }
+      return targetStory;
+    },
+    _setAllReadRatio() {
+      //页面加载时,从localStorage将本地阅读进度加载
+      if (this.lolStories) {
+        const localStoryKeys = Object.keys(this.lolStories);
+        for (let i = 0; i < this.stories.length; i++) {
+          if (localStoryKeys.includes(this.stories[i].title)) {
+            this.stories[i].ratio = this.lolStories[this.stories[i].title];
+          }
+        }
+      }
+    },
+  },
+  watch: {
+    //当阅读进度发生变化时,更新对应视图
+    lolStories(nVal, oVal) {
+      if (!nVal) return;
+      let ret = this._diffObj(nVal, oVal); //获取每次回到List页面时,阅读进度的差异
+      //如果存在差异就进行List页面相应的视图更新
+      if (Object.keys(ret).length) {
+        for (let i = 0; i < this.shownStoriesList.length; i++) {
+          if (this.shownStoriesList[i].title === ret.title) {
+            if (this.shownStoriesList[i].ratio) {
+              this.shownStoriesList[i].ratio = ret.ratio;
+              //不知道为什么视图不会立即更新,所以加了此方法强制视图进行更新
+              this.$forceUpdate();
+            } else {
+              console.log(this.shownStoriesList[i].title, ret.ratio, 2);
+              this.$set(this.shownStoriesList[i], "ratio", ret.ratio);
+            }
+
+            return;
+          }
+        }
       }
     },
   },

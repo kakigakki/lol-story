@@ -11,6 +11,7 @@
 <script>
 import Tabbar from "components/TabBar/TabBar";
 import Header from "components/Header/Header";
+
 export default {
   data() {
     return {

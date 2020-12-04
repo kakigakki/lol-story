@@ -37,6 +37,8 @@
             @contentheight="chineseHeight"
             :content="chineseVer"
             @click.native="showUI"
+            :font-size="fontSize"
+            :isProgressShow="isProgressShow"
           />
         </van-tab>
         <van-tab title="日本語" v-if="Object.keys(japaneseVer).length">
@@ -45,6 +47,8 @@
             @contentheight="japaneseHeight"
             :content="japaneseVer"
             @click.native="showUI"
+            :font-size="fontSize"
+            :isProgressShow="isProgressShow"
           />
         </van-tab>
         <van-tab title="English" v-if="Object.keys(englishVer).length">
@@ -53,6 +57,8 @@
             @contentheight="englishHeight"
             :content="englishVer"
             @click.native="showUI"
+            :font-size="fontSize"
+            :isProgressShow="isProgressShow"
           />
         </van-tab>
       </van-tabs>
@@ -61,18 +67,50 @@
         v-model="isPopupShow"
         round
         position="bottom"
-        :style="{ height: '30%' }"
+        :style="{ height: '35%' }"
         @closed="closePopup"
         class="popup"
       >
-      <van-row>
-          <van-col>
-            <van-slider v-model="value" :min="-50" :max="50" />
-          </van-col>
-      </van-row>
-      <van-row>
-          <van-col></van-col>
-      </van-row>
+        <div>
+          <p class="settingOpt">字体</p>
+          <van-slider
+            v-model="fontSize"
+            active-color="#0077B6"
+            bar-height="3px"
+            max="25"
+            min="12"
+          >
+            <template #button>
+              <div class="custom-button">
+                {{ fontSize }}
+              </div>
+            </template>
+          </van-slider>
+        </div>
+        <div>
+          <p class="settingOpt">字间距</p>
+          <van-slider
+            v-model="lineHeight"
+            active-color="#0077B6"
+            bar-height="3px"
+            :disabled="true"
+          >
+            <template #button>
+              <div class="custom-button">
+                {{ lineHeight }}
+              </div>
+            </template>
+          </van-slider>
+        </div>
+        <div class="switch">
+          <p class="settingOpt">阅读进度</p>
+          <van-switch
+            v-model="isProgressShow"
+            active-color="#0077B6"
+            class="vanSwitch"
+            size="25px"
+          />
+        </div>
       </van-popup>
     </div>
   </transition>
@@ -81,7 +119,10 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import { storyContent, storyContent2 } from "api/story";
-import { Icon, Row, Col, Tab, Tabs, List, Popup ,Slider } from "vant";
+
+
+import { Icon, Row, Col, Tab, Tabs, List, Popup, Slider, Switch } from "vant";
+
 import { StoryCon } from "common/js/story.js";
 import Content from "./child/Content";
 
@@ -103,13 +144,18 @@ export default {
         japanese: null,
         english: null,
       },
-      fontSize:0
+
+      fontSize: 17,
+      isProgressShow: true,
     };
   },
   computed: {
     ...mapGetters({
       storyUrl: "getStoryUrl",
     }),
+    lineHeight() {
+      return this.fontSize * 2;
+    },
   },
   components: {
     [Icon.name]: Icon,
@@ -119,7 +165,11 @@ export default {
     [Tabs.name]: Tabs,
     [List.name]: List,
     [Popup.name]: Popup,
-    [Slider.name] :Slider,
+
+
+    [Slider.name]: Slider,
+    [Switch.name]: Switch,
+
     Content,
   },
   created() {
@@ -144,7 +194,8 @@ export default {
         this.chineseVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
-          res.story["story-sections"]
+          res.story["story-sections"],
+          "chinese"
         );
       });
       //日文版本
@@ -153,7 +204,8 @@ export default {
         this.japaneseVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
-          res.story["story-sections"]
+          res.story["story-sections"],
+          "japanese"
         );
       });
 
@@ -163,7 +215,8 @@ export default {
         this.englishVer = new StoryCon(
           res.story.title,
           res.story.subtitle,
-          res.story["story-sections"]
+          res.story["story-sections"],
+          "english"
         );
       });
     },
@@ -315,8 +368,39 @@ export default {
     }
   }
 
-  .popup{
-    padding 40px
+  .popup {
+    padding: 10px 10px 30px 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .settingOpt {
+        font-size: 16px;
+        text-align: center;
+        padding: 20px 0;
+        align-self: start;
+      }
+
+      .custom-button {
+        width: 26px;
+        color: #fff;
+        font-size: 12px;
+        line-height: 20px;
+        text-align: center;
+        background-color: #0077B6;
+        border-radius: 100px;
+      }
+
+      .vanSwitch {
+        align-self: start;
+      }
+    }
   }
 }
 
