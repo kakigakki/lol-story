@@ -38,6 +38,9 @@ export default {
   components: {
     Scroll,
   },
+  created() {
+    this.touchInf = {};
+  },
   data() {
     return {
       readRatio: 0, //进度条比例
@@ -207,7 +210,6 @@ export default {
 
 .content {
   background-color: $color-background;
-  border-radius: 12px;
 
   .scrollWrapper {
     height: 100vh;

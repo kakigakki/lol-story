@@ -113,7 +113,6 @@ export default {
             new Date(a["release-date"]).getTime()
           );
         });
-      console.log(resModules);
       return resModules;
     },
     //图片加载时,刷新scroll
@@ -221,7 +220,6 @@ export default {
               //不知道为什么视图不会立即更新,所以加了此方法强制视图进行更新
               this.$forceUpdate();
             } else {
-              console.log(this.shownStoriesList[i].title, ret.ratio, 2);
               this.$set(this.shownStoriesList[i], "ratio", ret.ratio);
             }
 

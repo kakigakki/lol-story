@@ -25,7 +25,6 @@
       <van-tabs
         v-model="active"
         animated
-        swipeable
         sticky
         class="tabs"
         v-if="Object.keys(chineseVer).length"
@@ -120,7 +119,6 @@
 import { mapGetters, mapMutations } from "vuex";
 import { storyContent, storyContent2 } from "api/story";
 
-
 import { Icon, Row, Col, Tab, Tabs, List, Popup, Slider, Switch } from "vant";
 
 import { StoryCon } from "common/js/story.js";
@@ -165,7 +163,6 @@ export default {
     [Tabs.name]: Tabs,
     [List.name]: List,
     [Popup.name]: Popup,
-
 
     [Slider.name]: Slider,
     [Switch.name]: Switch,
