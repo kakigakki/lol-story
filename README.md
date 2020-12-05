@@ -50,12 +50,12 @@ http://106.55.149.238/lolStory
 
 ## 全体イメージ
 
-    ![20201204190245](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190245.png)
-    ![20201204185821](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204185821.png)
-    ![20201204190015](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190015.png)
-    ![20201204190036](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190036.png)
-    ![20201204190124](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190124.png)
-    ![20201204190154](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190154.png)
+![20201204190245](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190245.png)
+![20201204185821](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204185821.png)
+![20201204190015](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190015.png)
+![20201204190036](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190036.png)
+![20201204190124](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190124.png)
+![20201204190154](https://raw.githubusercontent.com/kakigakki/picBed/master/imgs/20201204190154.png)
 
 ## Project setup
 
