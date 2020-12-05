@@ -119,7 +119,10 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import { storyContent, storyContent2 } from "api/story";
+
+
 import { Icon, Row, Col, Tab, Tabs, List, Popup, Slider, Switch } from "vant";
+
 import { StoryCon } from "common/js/story.js";
 import Content from "./child/Content";
 
@@ -141,6 +144,7 @@ export default {
         japanese: null,
         english: null,
       },
+
       fontSize: 17,
       isProgressShow: true,
     };
@@ -161,8 +165,11 @@ export default {
     [Tabs.name]: Tabs,
     [List.name]: List,
     [Popup.name]: Popup,
+
+
     [Slider.name]: Slider,
     [Switch.name]: Switch,
+
     Content,
   },
   created() {
