@@ -61,7 +61,9 @@
           />
         </van-tab>
       </van-tabs>
-
+      <div class="loading" v-else>
+        <van-loading color="#0077B6" class="loadingImg" />
+      </div>
       <van-popup
         v-model="isPopupShow"
         round
@@ -119,7 +121,18 @@
 import { mapGetters, mapMutations } from "vuex";
 import { storyContent, storyContent2 } from "api/story";
 
-import { Icon, Row, Col, Tab, Tabs, List, Popup, Slider, Switch } from "vant";
+import {
+  Icon,
+  Row,
+  Col,
+  Tab,
+  Tabs,
+  List,
+  Popup,
+  Slider,
+  Switch,
+  Loading,
+} from "vant";
 
 import { StoryCon } from "common/js/story.js";
 import Content from "./child/Content";
@@ -163,10 +176,9 @@ export default {
     [Tabs.name]: Tabs,
     [List.name]: List,
     [Popup.name]: Popup,
-
     [Slider.name]: Slider,
     [Switch.name]: Switch,
-
+    [Loading.name]: Loading,
     Content,
   },
   created() {
@@ -399,6 +411,13 @@ export default {
       }
     }
   }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 .slide-enter-active, .slide-leave-active {

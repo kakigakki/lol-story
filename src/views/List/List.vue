@@ -1,46 +1,59 @@
 <template>
-  <div class="list" v-if="shownStoriesCard.length">
-    <ToolBar @changeListView="changeListView"></ToolBar>
-    <Scroll
-      class="scrollWrapper"
-      :data="shownStoriesCard"
-      ref="scroll"
-      :pullup="true"
-      @scrollToEnd="pullupLoading"
-      :probeType="3"
-    >
-      <div class="scrollContent">
-        <transition name="slide" appear mode="out-in">
-          <div v-if="isList" class="storyItem" key="1">
-            <StoryItem
-              v-for="(item, index) in shownStoriesList"
-              :key="index"
-              :title="item.title"
-              :hero="item['featured-champions']"
-              :ratio="item.ratio"
-              @click.native="
-                toStoryPage(item['story-slug'], item.url, item.ratio)
-              "
-            ></StoryItem>
-            <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
-            <p v-if="isFinished" class="finishedText">没有更多了</p>
-          </div>
-          <div v-else class="storyCard" key="2">
-            <StoryCard
-              v-for="(item, index) in shownStoriesCard"
-              :key="index"
-              :title="item.title"
-              :hero="item['featured-champions']"
-              :imgUrl="item.background.uri"
-              @click.native="toStoryPage(item['story-slug'], item.url, null)"
-            ></StoryCard>
-            <van-loading color="#0077B6" v-if="isLoading" class="loadingImg" />
-            <p v-if="isFinished" class="finishedText">没有更多了</p>
-          </div>
-        </transition>
-      </div>
-    </Scroll>
-    <router-view></router-view>
+  <div class="listWrapper">
+    <div class="list" v-if="shownStoriesList.length">
+      <ToolBar @changeListView="changeListView"></ToolBar>
+      <Scroll
+        class="scrollWrapper"
+        :data="scrollData"
+        ref="scroll"
+        :pullup="true"
+        @scrollToEnd="pullupLoading"
+        :probeType="3"
+      >
+        <div class="scrollContent">
+          <transition name="slide" appear mode="out-in">
+            <div v-if="isList" class="storyItem" key="1">
+              <StoryItem
+                v-for="(item, index) in shownStoriesList"
+                :key="index"
+                :title="item.title"
+                :hero="item['featured-champions']"
+                :ratio="item.ratio"
+                @click.native="
+                  toStoryPage(item['story-slug'], item.url, item.ratio)
+                "
+              ></StoryItem>
+              <van-loading
+                color="#0077B6"
+                v-if="isLoading"
+                class="loadingImg"
+              />
+              <p v-if="isFinished" class="finishedText">没有更多了</p>
+            </div>
+            <div v-else class="storyCard" key="2">
+              <StoryCard
+                v-for="(item, index) in shownStoriesCard"
+                :key="index"
+                :title="item.title"
+                :hero="item['featured-champions']"
+                :imgUrl="item.background.uri"
+                @click.native="toStoryPage(item['story-slug'], item.url, null)"
+              ></StoryCard>
+              <van-loading
+                color="#0077B6"
+                v-if="isLoading"
+                class="loadingImg"
+              />
+              <p v-if="isFinished" class="finishedText">没有更多了</p>
+            </div>
+          </transition>
+        </div>
+      </Scroll>
+      <router-view></router-view>
+    </div>
+    <div class="loading" v-else>
+      <van-loading color="#0077B6" class="loadingImg" />
+    </div>
   </div>
 </template>
 
@@ -76,6 +89,9 @@ export default {
     ...mapGetters({
       lolStories: "getHasRead",
     }),
+    scrollData() {
+      return this.shownStoriesList.concat(this.shownStoriesCard);
+    },
   },
   created() {
     //获得本地阅读进度
@@ -254,6 +270,13 @@ export default {
     line-height: 50px;
     text-align: center;
   }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 44px - 50px);
 }
 
 .slide-leave-to, .slide-enter {
